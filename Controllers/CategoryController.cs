@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data;
@@ -5,11 +6,15 @@ using Shop.Models;
 
 namespace Shop.Controllers
 {
-    [Route("categories")]
+    [Route("v1/categories")]
     public class CategoryController : ControllerBase
     {
         [HttpGet]//Decorar o método com o verbo da requisição
         [Route("")]
+        [AllowAnonymous]
+        [ResponseCache(VaryByHeader = "User-Agent", Location = ResponseCacheLocation.Any, Duration = 30)]
+        //[ResponseCache(VaryByHeader = "User-Agent", Location = ResponseCacheLocation.(outras opções de local), Duration = 30)]
+        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] -> Opçaõ de cache direto no builder, e apenas alguns métodos n guardar cache
         public async Task<ActionResult<List<Category>>> Get(
             [FromServices]DataContext context
         )
@@ -23,6 +28,7 @@ namespace Shop.Controllers
         
         [HttpGet]
         [Route("{id:int}")]//restrição na rota
+        [AllowAnonymous]
         public async Task<ActionResult<Category>> GetById(
             int id,
             [FromServices]DataContext context
@@ -34,6 +40,7 @@ namespace Shop.Controllers
 
         [HttpPost]
         [Route("")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<List<Category>>> Post(
             [FromBody]Category model,
             [FromServices]DataContext context
@@ -58,6 +65,7 @@ namespace Shop.Controllers
         
         [HttpPut]
         [Route("{id:int}")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<List<Category>>> Put(
             int id, 
             [FromBody]Category model,
